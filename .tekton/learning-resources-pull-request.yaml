@@ -58,6 +58,13 @@ spec:
 
       set -e
 
+      # Guard against Tekton nop image replacement
+      # See: https://github.com/tektoncd/pipeline/issues/1347
+      if ! command -v caddy >/dev/null 2>&1; then
+        echo "Caddy not found - running in nop image, exiting gracefully"
+        exit 0
+      fi
+
       echo "Starting application with container's built-in Caddy configuration..."
       exec caddy run --config /etc/caddy/Caddyfile
   - name: e2e-playwright-image
@@ -83,9 +90,9 @@ spec:
     resolver: git
     params:
     - name: url
-      value: https://github.com/RedHatInsights/konflux-pipelines
+      value: https://github.com/catastrophe-brandon/konflux-pipelines
     - name: revision
-      value: main
+      value: docs/e2e-sidecar-best-practices
     - name: pathInRepo
       value: pipelines/platform-ui/docker-build-run-all-tests.yaml
   taskRunTemplate:
